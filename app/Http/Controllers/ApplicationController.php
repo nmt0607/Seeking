@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Job;
+use App\Models\User;
+use App\Notifications\JobNotification;
 use App\Repositories\Application\ApplicationRepositoryInterface;
 use DB;
+use Pusher\Pusher;
 
 class ApplicationController extends Controller
 {
@@ -66,6 +69,28 @@ class ApplicationController extends Controller
     {
         $job = $this->applicationRepo->find($jobId);
         $this->authorize('update', $job);
+
+        $user = User::find($userId);
+        $data = [
+            'job_id' => $jobId,
+            'status' => $status,
+        ];
+
+        $options = array(
+            'cluster' => 'ap1',
+            'encrypted' => true
+        );
+
+        $pusher = new Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            $options
+        );
+
+        $pusher->trigger('NotificationEvent', 'send-message', $data);
+
+        $user->notify(new JobNotification($data));
         $this->applicationRepo->acceptOrReject($job, $userId, $status);
 
         return redirect()->route('list_candidate', ['id' => $jobId]);
