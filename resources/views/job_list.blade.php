@@ -16,6 +16,7 @@
                                 <a href="" role="tab" id="profile-tab" data-toggle="tab"
                                     aria-controls="profile">@lang('admin.unapproved_job')</a>
                             </li>
+
                         </ul>
                         <div id="approved_job_list" class="tab-content">
                             <div role="tabpanel" class="tab-pane fade in active" id="home" aria-labelledby="home-tab">
